@@ -32,6 +32,33 @@ var Bindr = {
 		jQuery('#bindr_showpress').html(sequence).show().fadeOut('slow');
 	},
 
+	showWarning : function (message)
+	{
+		if (jQuery('#bindr_showwarn').empty())
+		{
+			var div = document.createElement('div');
+			div.id = 'bindr_showwarn';
+			jQuery('body').append(div);
+			jQuery(div).css('position', 'fixed')
+			  .css('bottom', '0')
+			  .css('right',  '0')
+			  .css('background-color', '#A22')
+			  .css('width', 'auto')
+			  .css('height', '20px')
+			  .css('font-family', 'monospace')
+			  .css('font-size', '16px')
+			  .css('text-align', 'center')
+			  .css('padding', '3px')
+			  .css('color', 'white')
+			  .css('border', '2px solid #F00')
+			  .css('display', 'none');
+		
+		}
+
+		jQuery('#bindr_showwarn').html(message).show();
+		setTimeout(function() { jQuery('#bindr_showwarn').fadeOut('slow') }, 5000);
+	},
+
 	/**
 	 * Get a mapping based on a keypress
 	 * @param {int}    keycode Keycode of command

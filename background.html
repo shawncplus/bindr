@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <script type="text/javascript" src="chrome_ex_oauthsimple.js"></script>
+    <script type="text/javascript" src="chrome_ex_oauth.js"></script>
+	<script type="text/javascript">
+		var host = localStorage['bindrHost'];
+		if (host == undefined) {
+		  host = "kbindr.appspot.com";
+		}
+
+		var baseUrl = 'https://' + host;
+		var oauth = ChromeExOAuth.initBackgroundPage({
+			'request_url' : baseUrl + '/_ah/OAuthGetRequestToken',
+			'authorize_url' : baseUrl + '/_ah/OAuthAuthorizeToken',
+			'access_url' : baseUrl + '/_ah/OAuthGetAccessToken',
+			'consumer_key' : 'anonymous',
+			'consumer_secret' : 'anonymous',
+			'scope' : baseUrl,
+			'app_name' : 'Bindr'
+		});
+
+		function getMappings(callback) {
+			oauth.authorize(function() {
+				console.log(["on authorize", arguments]);
+				var url = baseUrl + "/fetch";
+				oauth.sendSignedRequest(url, callback);
+			});
+		};
+
+		chrome.extension.onRequest.addListener(function (request, sender, response)
+		{
+			switch (request.load)
+			{
+				case 'mappings':
+					getMappings(response);
+					break;
+			}
+
+		});
+</script>

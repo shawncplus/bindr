@@ -5,9 +5,11 @@
 		"browser_action": {
 			"default_icon": "icon.png"
 		},
+		"background_page": "background.html",
 		"permissions": [
-			"http://*/*",
-			"notifications"
+			"*://*/*",
+			"notifications",
+			"tabs"
 		],
 		"content_scripts" : [{
 			"matches": ["http://*/*"],
