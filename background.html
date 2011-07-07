@@ -21,10 +21,20 @@
 
 		function getMappings(callback) {
 			oauth.authorize(function() {
-				console.log(["on authorize", arguments]);
 				var url = baseUrl + "/fetch";
 				oauth.sendSignedRequest(url, callback);
 			});
+		};
+
+		function addMapping(data, callback) {
+			oauth.authorize(function() {
+				var url = baseUrl + "/add";
+				oauth.sendSignedRequest(url, callback, {
+					method : 'POST',
+					parameters : data
+				});
+			});
+
 		};
 
 		chrome.extension.onRequest.addListener(function (request, sender, response)
@@ -33,6 +43,9 @@
 			{
 				case 'mappings':
 					getMappings(response);
+					break;
+				case 'addMapping':
+					addMapping(request.data, response);
 					break;
 			}
 

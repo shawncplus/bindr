@@ -6,7 +6,7 @@ var Bindr = {
 	 * Display the command box (mimics Vim's 'showcmd')
 	 * @param {string} sequence Current sequence string
 	 */
-	showPress : function (sequence)
+	showPress : function (sequence, time)
 	{
 		if (jQuery('#bindr_showpress').empty())
 		{
@@ -18,7 +18,8 @@ var Bindr = {
 			  .css('right',  '0')
 			  .css('background-color', '#000')
 			  .css('opacity', '0.4')
-			  .css('width', '100px')
+			  .css('width', 'auto')
+			  .css('min-width', '100px')
 			  .css('height', '20px')
 			  .css('font-family', 'monospace')
 			  .css('font-size', '16px')
@@ -29,10 +30,11 @@ var Bindr = {
 		
 		}
 
-		jQuery('#bindr_showpress').html(sequence).show().fadeOut('slow');
+		jQuery('#bindr_showpress').html(sequence).show();
+		setTimeout(function() { jQuery('#bindr_showpress').fadeOut('slow') }, time || 1);
 	},
 
-	showWarning : function (message)
+	showWarning : function (message, time)
 	{
 		if (jQuery('#bindr_showwarn').empty())
 		{
@@ -44,6 +46,7 @@ var Bindr = {
 			  .css('right',  '0')
 			  .css('background-color', '#A22')
 			  .css('width', 'auto')
+			  .css('min-width', '100px')
 			  .css('height', '20px')
 			  .css('font-family', 'monospace')
 			  .css('font-size', '16px')
@@ -56,7 +59,7 @@ var Bindr = {
 		}
 
 		jQuery('#bindr_showwarn').html(message).show();
-		setTimeout(function() { jQuery('#bindr_showwarn').fadeOut('slow') }, 5000);
+		setTimeout(function() { jQuery('#bindr_showwarn').fadeOut('slow') }, time || 5000);
 	},
 
 	/**
@@ -72,11 +75,12 @@ var Bindr = {
 		{
 			var bindr_key = keys[i];
 			if (typeof bindr_key === 'function') continue;
-			for (var j in bindr_key.sites)
+			var sites = bindr_key.getSites();
+			for (var j in sites)
 			{
-				if (typeof bindr_key.sites[j] === 'function') continue;
-				var regex = new RegExp('^' + bindr_key.sites[j].replace('/', '\\/') + '$');
-				if (!regex.test(site)) return false;
+				if (typeof sites[j] === 'function') continue;
+				var regex = new RegExp('^' + sites[j].replace(/\//g, '\\/') + '$');
+				if (!regex.test(site)) continue;
 			}
 			if (bindr_key.getKeyCode() === keycode) return bindr_key;
 		}
@@ -96,10 +100,10 @@ var Bindr_Mapping = function (config) {
 	 * @param {object}
 	 */
 	self.config = {
-		key : null,  // Actual char of key pressed e.g., 'G'
+		bind  : null,  // Actual char of key pressed e.g., 'G'
 		sites : [],  // Array of regexs for sites it should work on
-		type : null, // Type of action
-		data : {}    // Data for the action (changes based on type)
+		type  : null, // Type of action
+		data  : {}    // Data for the action (changes based on type)
 	};
 
 	/**
@@ -135,12 +139,17 @@ var Bindr_Mapping = function (config) {
 	/**
 	 * @return {int} Keycode for this mapping's key
 	 */
-	self.getKeyCode  = function () { return self.config.key.charCodeAt(); }
+	self.getKeyCode  = function () { return self.config.bind.charCodeAt(); }
 
 	/**
 	 * @return {string} Char of mapping's key
 	 */
-	self.getKey      = function () { return self.config.key; }
+	self.getKey      = function () { return self.config.bind; }
+
+	/**
+	 * @return {array} array of sites which this binding is active
+	 */
+	self.getSites    = function () { return self.config.sites; }
 
 	/**
 	 * Initialize and apply the config

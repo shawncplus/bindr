@@ -1,0 +1,286 @@
+<style>
+	body { width: 400px }
+	strong { text-align: center }
+	input[type=text] {
+		border: 1px solid #ccc;
+		padding: none;
+		margin: 2px;
+		height: 25px;
+		-moz-border-radius: 3px;
+		-webkit-border-radius: 3px;
+	}
+
+	textarea {
+		border: 1px solid #ccc;
+		padding: none;
+		margin: 2px;
+		-moz-border-radius: 3px;
+		-webkit-border-radius: 3px;
+	}
+
+	#bindr_key_display { width: 35px; padding: 0 10px }
+	a.fancy_button {
+		height: 25px;
+		background-color: #ccc;
+		-moz-border-radius: 3px;
+		-webkit-border-radius: 3px;
+		border: 1px solid #777;
+		color: #666;
+		text-decoration: none;
+		padding: 3px;
+		font-size: 13px;
+		font-weight: bold;
+		-moz-box-shadow: 0 0 1px black;
+		-webkit-box-shadow: 0 0 1px black;
+	}
+
+	div.width { padding: 10px 10px; border-bottom: 1px solid #eee; height: auto; }
+	div.width div { width: 45%; clear: both; display: inline}
+	div.width div:last-child { float:right; text-align: left; }
+
+	div#sitescontainer, div#typecontainer-custom { height: 100px; }
+
+	div#warnings {
+		border: 2px solid red;
+		background-color: #FCC;
+		padding: 3px;
+		margin: 3px;
+	}
+
+	div#popup_display div { margin: 20px 0; }
+
+
+	div.map_wrapper { border: 1px solid black; margin-bottom: 10px;margin-top: 5px;}
+	div.map_title { width: 100%; padding:  5px 0; text-align: center; color: #222; background-color: #ccc; }
+	div.map_data { border-top: 1px solid black; }
+</style>
+<script type="text/javascript" src="jquery.js"></script>
+<script>
+var showWarning = function (message)
+{
+	jQuery('#warnings').html(message).show();
+	setTimeout(function () { jQuery('#warnings').fadeOut(2000); }, 3000);
+};
+
+jQuery(document).ready(function ()
+{
+	chrome.tabs.getSelected(null,function(tab) {
+		jQuery('#sites').val(tab.url);
+	});
+
+	jQuery('#bindr_key_display').keypress(function (e)
+	{
+		jQuery(this).attr('disabled', true);
+		jQuery('#bindr_key').val(String.fromCharCode(e.keyCode));
+		jQuery(this).val(String.fromCharCode(e.keyCode));
+	});
+
+	jQuery('#assign_key').click(function ()
+	{
+		jQuery('#bindr_key_display').attr('disabled', false).focus();
+	});
+
+	jQuery('#typeopt').change(function (e)
+	{
+		if (/\w+/.test(e.target.value))
+		{
+			jQuery('#container *[id^=typecontainer-]').hide();
+			jQuery('#typecontainer-' + e.target.value).show().focus();
+		}
+		else return false;
+	});
+
+	jQuery('#scroll-data').keypress(function (e)
+	{
+		if (isNaN(parseInt(String.fromCharCode(e.keyCode), 10))) return false;
+	});
+
+	jQuery('#addform').submit(function ()
+	{
+		var values = {
+			bind  : jQuery('#bindr_key').val(),
+			sites : jQuery.trim(jQuery('#sites').val()).split(/[\r\n]/),
+			type  : jQuery('#typeopt').val()
+		};
+
+
+		if (!values.bind)
+		{
+			showWarning('You didn\'t specify a key to bind. Sorry, telepathy isn\'t an option.');
+			return false;
+		}
+
+		if (!values.sites[0] || !values.sites.length)
+		{
+			showWarning('So... it\'s just not gonna work anywhere? *points to the "sites" field*');
+			return false;
+		}
+
+		if (!(/\w+/.test(values.type)))
+		{
+			showWarning('You must select a type');
+			return false;
+		}
+
+
+		values.data = jQuery('#' + values.type + '-data').val();
+
+		if (!values.data)
+		{
+			showWarning('You have to elaborate on the action for your ' + values.type + ' action.');
+			return false;
+		}
+
+		chrome.extension.sendRequest({load : 'addMapping', data : values}, function (response)
+		{
+			chrome.tabs.getSelected(null, function(tab) {
+				chrome.tabs.sendRequest(tab.id, {add: "success"}, function(response) {
+					window.close();
+				});
+			});
+		});
+		return false;
+	});
+
+	var renderMappings = function (mappings)
+	{
+		chrome.tabs.getSelected(null,function(tab) {
+			var url = tab.url, site_mappings = [];
+			
+			for (var i in mappings)
+			{
+				var mapping = mappings[i];
+				if (typeof mapping === 'function') continue;
+
+				var sites = mapping.config.sites;
+				for (var j in sites)
+				{
+					if (typeof sites[j] === 'function') continue;
+					var regex = new RegExp('^' + sites[j].replace(/\//g, '\\/') + '$');
+					if (!regex.test(url)) continue;
+					else site_mappings.push(mapping);
+				}
+			}
+
+
+			// fresh start
+			var container = jQuery('#mappings_container');
+			container.empty();
+
+			for (var i in site_mappings)
+			{
+				var mapping = site_mappings[i];
+				if (typeof mapping === 'function') continue;
+
+				var div = document.createElement('div');
+				jQuery(container).append(div);
+				jQuery(div).addClass('map_wrapper');
+
+				var title = document.createElement('div');
+				jQuery(div).append(title);
+				jQuery(title).addClass('map_title');
+				jQuery(title).html(mapping.config.bind);
+
+				var data = document.createElement('div');
+				jQuery(div).append(data);
+				jQuery(data).addClass('map_data');
+				jQuery(data).html(mapping.config.type + ':' + mapping.config.data);
+				jQuery(data).hide();
+
+
+				(function (el) {
+					jQuery(title).click(function()
+					{
+						jQuery("div.map_data", el).toggle();
+					});
+				})(div);
+			}
+		});
+	};
+
+	// Load mappings for display
+	chrome.tabs.getSelected(null, function(tab) {
+		chrome.tabs.sendRequest(tab.id, {load: "get"}, function(response) {
+			renderMappings(response);
+		});
+	});
+
+	jQuery('#show_add').click(function ()
+	{
+		jQuery('#popup_display').hide();
+		jQuery('#add_mapping').show();
+	});
+
+	jQuery('#show_mappings').click(function ()
+	{
+		jQuery('#popup_display').hide();
+		jQuery('#mappings_display').show();
+	});
+
+	jQuery('#back_to_from_add').click(function ()
+	{
+		jQuery('#add_mapping').hide()
+		jQuery('#popup_display').show()
+	});
+
+	jQuery('#back_to_from_map').click(function ()
+	{
+		jQuery('#mappings_display').hide()
+		jQuery('#popup_display').show()
+	});
+});
+</script>
+<div id="popup_display">
+	<div><a href="#" class="fancy_button" id="show_mappings">Show Mappings</a></div>
+	<div><a href="#" class="fancy_button" id="show_add">Add Mapping</a></div>
+</div>
+
+<div id="mappings_display" style="display: none">
+	<div style="float:right"><a href="#" class="fancy_button" id="back_to_from_map">Back</a></div>
+	<strong>Your Mappings</strong>
+	<div id="mappings_container"></div>
+</div>
+
+<div id="add_mapping" style="display:none">
+	<strong>Add Mapping</strong>
+
+	<div style="float:right"><a href="#" class="fancy_button" id="back_to_from_add">Back</a></div>
+	<form id="addform">
+	<input type="hidden" name="key" id="bindr_key" />
+
+	<div id="container">
+		<div id="keycontainer" class="width">
+			<div><label for="key">Key</label></div> 
+			<div><input type="text" id="bindr_key_display" disabled="disabled"/><a href="#" class="fancy_button" id="assign_key">Assign</a></div>
+		</div>
+
+		<div id="sitescontainer" class="width">
+			<div><label for="sites">Sites</label></div>
+			<div><textarea name="sites" id="sites" rows="5" cols="20"></textarea></div>
+		</div>
+
+		<div id="typecontainer" class="width">
+			<div><label for="type">Type</label></div>
+			<div>
+				<select name="type" id="typeopt">
+					<option>---</option>
+					<option value="scroll">Scroll</option>
+					<option value="custom">Custom</option>
+				</select>
+			</div>
+		</div>
+
+		<div id="typecontainer-scroll" class="width" style="display:none">
+			<div><label for="scroll-data">Scroll increment</label></div>
+			<div><input type="text" name="data" id="scroll-data" /></div>
+		</div>
+
+		<div id="typecontainer-custom" class="width" style="display:none">
+			<div><label for="custom-data">Code</label></div>
+			<div><textarea name="data" id="custom-data" rows="5" cols="20"></textarea></div>
+		</div>
+
+		<input type="submit" value="Add Binding" />
+		<div id="warnings" style="display:none"></div>
+	</form>
+</div>
