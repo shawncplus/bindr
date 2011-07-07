@@ -82,7 +82,7 @@ jQuery(document).ready(function ()
 
 	jQuery('#typeopt').change(function (e)
 	{
-		if (/\w+/.test(e.target.value))
+		if (/[\w\-]+/.test(e.target.value))
 		{
 			jQuery('#container *[id^=typecontainer-]').hide();
 			jQuery('#typecontainer-' + e.target.value).show().focus();
@@ -265,6 +265,7 @@ jQuery(document).ready(function ()
 				<select name="type" id="typeopt">
 					<option>---</option>
 					<option value="scroll">Scroll</option>
+					<option value="scroll-el">Scroll by Selector</option>
 					<option value="custom">Custom</option>
 				</select>
 			</div>
@@ -278,6 +279,11 @@ jQuery(document).ready(function ()
 		<div id="typecontainer-custom" class="width" style="display:none">
 			<div><label for="custom-data">Code</label></div>
 			<div><textarea name="data" id="custom-data" rows="5" cols="20"></textarea></div>
+		</div>
+
+		<div id="typecontainer-scroll-el" class="width" style="display:none">
+			<div><label for="scroll-data">Scroll selector</label></div>
+			<div><input type="text" name="data" id="scroll-el-data" /></div>
 		</div>
 
 		<input type="submit" value="Add Binding" />

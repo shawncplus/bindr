@@ -8,7 +8,7 @@ var Bindr = {
 	 */
 	showPress : function (sequence, time)
 	{
-		if (jQuery('#bindr_showpress').empty())
+		if (!jQuery('#bindr_showpress'))
 		{
 			var div = document.createElement('div');
 			div.id = 'bindr_showpress';
@@ -36,7 +36,7 @@ var Bindr = {
 
 	showWarning : function (message, time)
 	{
-		if (jQuery('#bindr_showwarn').empty())
+		if (!jQuery('#bindr_showwarn'))
 		{
 			var div = document.createElement('div');
 			div.id = 'bindr_showwarn';
@@ -113,7 +113,7 @@ var Bindr_Mapping = function (config) {
 	 */
 	self.action = function (args, event)
 	{
-		self['exec_' + self.config.type](args);
+		self['exec_' + self.config.type.replace(/-/g, '_')](args);
 	};
 
 	/**
@@ -134,6 +134,16 @@ var Bindr_Mapping = function (config) {
 		var code = self.config.data;
 		code = code.replace(/%args%/, args.join(''));
 		eval(code);
+	};
+
+	/**
+	 * Scroll by selector type handler
+	 * @param {array} args Command arguments (Nth item)
+	 */
+	self.exec_scroll_el = function (args)
+	{
+		if (args.length) self.elcounter += parseInt(args.join(''), 10);
+		window.scrollTo(0, jQuery(jQuery.trim(self.config.data)).eq(self.elcounter++).prop('offsetTop'));
 	};
 
 	/**
