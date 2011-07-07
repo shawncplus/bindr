@@ -1,0 +1,18 @@
+{
+	"name": "Bindr",
+		"version": "0.1",
+		"description": "Per-site keybindings",
+		"browser_action": {
+			"default_icon": "icon.png"
+		},
+		"permissions": [
+			"http://*/*",
+			"notifications"
+		],
+		"content_scripts" : [{
+			"matches": ["http://*/*"],
+			"js" : ["jquery.js", "lib.js", "baseline.js"],
+			"run_at" : "document_end"
+		}]
+
+}
