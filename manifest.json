@@ -14,7 +14,7 @@
 		],
 		"content_scripts" : [{
 			"matches": ["http://*/*"],
-			"js" : ["jquery.js", "lib.js", "baseline.js"],
+			"js" : ["js/jquery.js", "js/lib.js", "js/baseline.js"],
 			"run_at" : "document_end"
 		}]
 

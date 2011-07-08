@@ -1,7 +1,7 @@
 <html>
   <head>
-    <script type="text/javascript" src="chrome_ex_oauthsimple.js"></script>
-    <script type="text/javascript" src="chrome_ex_oauth.js"></script>
+    <script type="text/javascript" src="js/chrome_ex_oauthsimple.js"></script>
+    <script type="text/javascript" src="js/chrome_ex_oauth.js"></script>
 	<script type="text/javascript">
 		var host = localStorage['bindrHost'];
 		if (host == undefined) {
@@ -19,17 +19,35 @@
 			'app_name' : 'Bindr'
 		});
 
-		function getMappings(callback) {
+		function getMappings(callback, forceCache)
+		{
+			// check for a cache first
+			if (localStorage.getItem('bindrMappings') !== null && !forceCache)
+			{
+				if (callback) callback(localStorage.getItem('bindrMappings'));
+				return;
+			}
+
+			// either we don't have data or the cache was invalidated (added a mapping)
 			oauth.authorize(function() {
 				var url = baseUrl + "/fetch";
-				oauth.sendSignedRequest(url, callback);
+				oauth.sendSignedRequest(url, function (data)
+				{
+					localStorage.setItem('bindrMappings', data);
+					if (callback) callback(data);
+				});
 			});
 		};
 
-		function addMapping(data, callback) {
+		function addMapping(data, callback)
+		{
 			oauth.authorize(function() {
 				var url = baseUrl + "/add";
-				oauth.sendSignedRequest(url, callback, {
+				oauth.sendSignedRequest(url, function (response)
+				{
+					// force a refresh of the cache if they added an item
+					getMappings(function () { callback(response); }, true);
+				}, {
 					method : 'POST',
 					parameters : data
 				});
@@ -46,6 +64,9 @@
 					break;
 				case 'addMapping':
 					addMapping(request.data, response);
+					break;
+				case 'forceRefresh':
+					getMappings(response, true);
 					break;
 			}
 

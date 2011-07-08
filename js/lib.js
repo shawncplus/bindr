@@ -8,7 +8,7 @@ var Bindr = {
 	 */
 	showPress : function (sequence, time)
 	{
-		if (!jQuery('#bindr_showpress'))
+		if (!jQuery('#bindr_showpress').length)
 		{
 			var div = document.createElement('div');
 			div.id = 'bindr_showpress';
@@ -31,12 +31,12 @@ var Bindr = {
 		}
 
 		jQuery('#bindr_showpress').html(sequence).show();
-		setTimeout(function() { jQuery('#bindr_showpress').fadeOut('slow') }, time || 1);
+		setTimeout(function() { jQuery('#bindr_showpress').fadeOut('slow') }, time || 1000);
 	},
 
 	showWarning : function (message, time)
 	{
-		if (!jQuery('#bindr_showwarn'))
+		if (!jQuery('#bindr_showwarn').length)
 		{
 			var div = document.createElement('div');
 			div.id = 'bindr_showwarn';
@@ -79,10 +79,12 @@ var Bindr = {
 			for (var j in sites)
 			{
 				if (typeof sites[j] === 'function') continue;
+
 				var regex = new RegExp('^' + sites[j].replace(/\//g, '\\/') + '$');
-				if (!regex.test(site)) continue;
+
+				if (regex.test(site) && bindr_key.getKeyCode() === keycode)
+					return bindr_key;
 			}
-			if (bindr_key.getKeyCode() === keycode) return bindr_key;
 		}
 
 		return false;

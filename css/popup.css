@@ -1,0 +1,54 @@
+body { width: 400px }
+strong { text-align: center }
+input[type=text] {
+	border: 1px solid #ccc;
+	padding: none;
+	margin: 2px;
+	height: 25px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+}
+
+textarea {
+	border: 1px solid #ccc;
+	padding: none;
+	margin: 2px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+}
+
+#bindr_key_display { width: 35px; padding: 0 10px }
+a.fancy_button {
+	height: 25px;
+	background-color: #ccc;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border: 1px solid #777;
+	color: #666;
+	text-decoration: none;
+	padding: 3px;
+	font-size: 13px;
+	font-weight: bold;
+	-moz-box-shadow: 0 0 1px black;
+	-webkit-box-shadow: 0 0 1px black;
+}
+
+div.width { padding: 10px 10px; border-bottom: 1px solid #eee; height: auto; }
+div.width div { width: 45%; clear: both; display: inline}
+div.width div:last-child { float:right; text-align: left; }
+
+div#sitescontainer, div#typecontainer-custom { height: 100px; }
+
+div#warnings {
+	border: 2px solid red;
+	background-color: #FCC;
+	padding: 3px;
+	margin: 3px;
+}
+
+div#popup_display div { margin: 20px 0; }
+
+
+div.map_wrapper { border: 1px solid black; margin-bottom: 10px;margin-top: 5px;}
+div.map_title { width: 100%; padding:  5px 0; text-align: center; color: #222; background-color: #ccc; }
+div.map_data { border-top: 1px solid black; }

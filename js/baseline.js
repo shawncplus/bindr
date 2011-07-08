@@ -34,29 +34,37 @@ chrome.extension.onRequest.addListener(function (request, sender, sendResponse)
 
 	if (request.add === 'success')
 	{
-		window.close();
-		Bindr.showPress("Your keybinding has been added. Refreshing window...", 2000);
+		sendResponse();
+		Bindr.showPress("Your keybindings have been updated. Refreshing window...", 2000);
 		setTimeout(function () { window.location.href = window.location.href; }, 2000);
 	}
 });
 
 
 // load and set keybindings
-chrome.extension.sendRequest({load: 'mappings'}, function(response) {
-	response = eval(response);
-	if (!response.length)
-	{
-		Bindr.showWarning('Couldn\'t load mappings... sorry.');
-		return false;
-	}
+var mappings = localStorage.getItem('bindrMappings');
+if (mappings === null)
+{
+	chrome.extension.sendRequest({load: 'mappings'}, function(mappings) {
+		if (mappings === null)
+			Bindr.showWarning('Couldn\'t load mappings... sorry.');
+		else
+			setBindings(mappings);
+	});
+}
+else
+{
+	setBindings(mappings);
+}
 
-
-
+var setBindings = function (mappings)
+{
+	mappings = eval(mappings);
 	// create Bindr_Mappings from the response
-	for (var i in response)
+	for (var i in mappings)
 	{
-		if (typeof response[i] === 'function') continue;
-		var map = response[i];
+		if (typeof mappings[i] === 'function') continue;
+		var map = mappings[i];
 		bindr_keys.push(new Bindr_Mapping(map));
 	}
 
@@ -72,19 +80,20 @@ chrome.extension.sendRequest({load: 'mappings'}, function(response) {
 		else if (bindr_seq_start)
 		{
 			if (keycode === bindr_leader) return;
+
+			// numeric arguments to the command
+			if (!isNaN(parseInt(String.fromCharCode(keycode), 10)))
+			{
+				bindr_key_args.push(String.fromCharCode(keycode));
+				Bindr.showPress(String.fromCharCode(bindr_leader) + bindr_key_args.join(''));
+			}
 			// fetch the correct action for the command
-			if (bindr_key = Bindr.findKeyAction(keycode, bindr_keys, window.location.href))
+			else if (bindr_key = Bindr.findKeyAction(keycode, bindr_keys, window.location.href))
 			{
 				Bindr.showPress(String.fromCharCode(bindr_leader) + bindr_key_args.join('') + bindr_key.getKey());
 				bindr_key.action(bindr_key_args, e);
 				bindr_seq_start = false;
 				bindr_key_args = [];
-			}
-			// numeric arguments to the command
-			else if (!isNaN(parseInt(String.fromCharCode(keycode), 10)))
-			{
-				bindr_key_args.push(String.fromCharCode(keycode));
-				Bindr.showPress(String.fromCharCode(bindr_leader) + bindr_key_args.join(''));
 			}
 			// bad/cancelled command
 			else
@@ -95,4 +104,5 @@ chrome.extension.sendRequest({load: 'mappings'}, function(response) {
 			}
 		}
 	});
-});
+
+};
