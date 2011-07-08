@@ -55,6 +55,23 @@
 
 		};
 
+
+		function delMapping(data, callback)
+		{
+			oauth.authorize(function() {
+				var url = baseUrl + "/delete";
+				oauth.sendSignedRequest(url, function (response)
+				{
+					// force a refresh of the cache if they added an item
+					getMappings(function () { callback(response); }, true);
+				}, {
+					method : 'POST',
+					parameters : data
+				});
+			});
+
+		};
+
 		chrome.extension.onRequest.addListener(function (request, sender, response)
 		{
 			switch (request.load)
@@ -64,6 +81,9 @@
 					break;
 				case 'addMapping':
 					addMapping(request.data, response);
+					break;
+				case 'delMapping':
+					delMapping(request.data, response);
 					break;
 				case 'forceRefresh':
 					getMappings(response, true);

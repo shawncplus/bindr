@@ -101,7 +101,11 @@ jQuery(document).ready(function ()
 					if (typeof sites[j] === 'function') continue;
 					var regex = new RegExp('^' + sites[j].replace(/\//g, '\\/') + '$');
 					if (!regex.test(url)) continue;
-					else site_mappings.push(mapping);
+					else
+					{
+						site_mappings.push(mapping);
+						break;
+					}
 				}
 			}
 
@@ -124,6 +128,10 @@ jQuery(document).ready(function ()
 				jQuery(title).addClass('map_title');
 				jQuery(title).html(mapping.bind);
 
+				var remove = document.createElement('div');
+				jQuery(title).append(remove);
+				jQuery(remove).addClass('remove_button').html('Del');
+
 				var data = document.createElement('div');
 				jQuery(div).append(data);
 				jQuery(data).addClass('map_data');
@@ -131,16 +139,53 @@ jQuery(document).ready(function ()
 				jQuery(data).hide();
 
 
-				(function (el) {
+				(function (el, binding) {
 					jQuery(title).click(function()
 					{
 						jQuery("div.map_data", el).toggle();
 					});
-				})(div);
+
+					jQuery(remove).click(function()
+					{
+						showRemoveConfirm(binding);
+					});
+				})(div, mapping);
 			}
 		});
 	};
 
+	function removeMapping(mapping)
+	{
+		chrome.extension.sendRequest({load : 'delMapping', data : mapping}, function (response)
+		{
+			chrome.tabs.getSelected(null, function(tab) {
+				chrome.tabs.sendRequest(tab.id, {add: "success"}, function(response) {
+					window.close();
+				});
+			});
+		});
+	}
+
+	function showRemoveConfirm(mapping)
+	{
+		jQuery('#mappings_display').hide();
+		var deldis = jQuery('#delete_display');
+
+		jQuery('h4', deldis).html('Delete binding (' + mapping.bind + ')?');
+		jQuery('#selyes').unbind('click').click(function ()
+		{
+			removeMapping(mapping);
+		});
+
+		jQuery('#selno').unbind('click').click(function ()
+		{
+			jQuery('#delete_display').hide();
+			jQuery('#popup_display').show();
+		});
+
+		jQuery('#delete_display').show();
+
+	};
 
 	jQuery('#show_add').click(function ()
 	{
