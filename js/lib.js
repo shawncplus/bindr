@@ -160,6 +160,20 @@ var Bindr_Mapping = function (config) {
 	};
 
 	/**
+	 * Click an element by selector type handler
+	 * @param {array} args Command arguments
+	 */
+	self.exec_click = function (args)
+	{
+		var selector = self.config.data.replace(/%args%/, args.join(''));
+		var evt = document.createEvent('MouseEvents');
+		evt.initEvent('click', true, false);
+		var node = document.querySelector(selector);
+		if (node) node.dispatchEvent(evt);
+		else Bindr.showWarning('No element found for selector "' + selector + '"', 1000);
+	};
+
+	/**
 	 * @return {int} Keycode for this mapping's key
 	 */
 	self.getKeyCode  = function () { return self.config.bind.charCodeAt(); }

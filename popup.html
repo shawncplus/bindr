@@ -45,6 +45,7 @@
 					<option value="scroll">Scroll</option>
 					<option value="scroll-el">Scroll by Selector</option>
 					<option value="visit-url">Visit URL</option>
+					<option value="click">Click element</option>
 					<option value="custom">Custom</option>
 				</select>
 			</div>
@@ -69,6 +70,11 @@
 			<div class="note"><strong>%args%</strong> in the url will be replaced by the command</div>
 			<div><label for="visit-url-data">New URL</label></div>
 			<div><input type="text" name="data" id="visit-url-data" /></div>
+		</div>
+
+		<div id="typecontainer-click" class="width" style="display:none">
+			<div><label for="click-data">Element selector</label></div>
+			<div><input type="text" name="data" id="click-data" /></div>
 		</div>
 
 		<input type="submit" value="Add Binding" />
