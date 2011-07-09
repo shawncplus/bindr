@@ -96,6 +96,7 @@ var Bindr = {
  */
 var Bindr_Mapping = function (config) {
 	var self = this;
+	self.elcounter = 0;
 
 	/**
 	 * general config
