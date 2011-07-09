@@ -36,6 +36,7 @@ a.fancy_button {
 div.width { padding: 10px 10px; border-bottom: 1px solid #eee; height: auto; }
 div.width div { width: 45%; clear: both; display: inline}
 div.width div:last-child { float:right; text-align: left; }
+div.width div.note { display: block; width: 100%; font-size: 12px; font-color: #ccc;}
 
 div#sitescontainer, div#typecontainer-custom { height: 100px; }
 

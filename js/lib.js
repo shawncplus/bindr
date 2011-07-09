@@ -80,7 +80,7 @@ var Bindr = {
 			{
 				if (typeof sites[j] === 'function') continue;
 
-				var regex = new RegExp('^' + sites[j].replace(/\//g, '\\/') + '$');
+				var regex = new RegExp('^' + sites[j] + '$');
 
 				if (regex.test(site) && bindr_key.getKeyCode() === keycode)
 					return bindr_key;
@@ -146,6 +146,17 @@ var Bindr_Mapping = function (config) {
 	{
 		if (args.length) self.elcounter += parseInt(args.join(''), 10);
 		window.scrollTo(0, jQuery(jQuery.trim(self.config.data)).eq(self.elcounter++).prop('offsetTop'));
+	};
+
+
+	/**
+	 * Go to a url, passing the command arg
+	 * @param {array} args Command arguments
+	 */
+	self.exec_visit_url = function (args)
+	{
+		url = self.config.data.replace(/%args%/, args.join(''));
+		window.location.href = url;
 	};
 
 	/**

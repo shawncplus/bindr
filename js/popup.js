@@ -8,6 +8,7 @@ jQuery(document).ready(function ()
 {
 	chrome.tabs.getSelected(null,function(tab) {
 		jQuery('#sites').val(tab.url);
+		jQuery('#visit-url-data').val(tab.url);
 	});
 
 	jQuery('#bindr_key_display').keypress(function (e)
@@ -99,7 +100,7 @@ jQuery(document).ready(function ()
 				for (var j in sites)
 				{
 					if (typeof sites[j] === 'function') continue;
-					var regex = new RegExp('^' + sites[j].replace(/\//g, '\\/') + '$');
+					var regex = new RegExp('^' + sites[j] + '$');
 					if (!regex.test(url)) continue;
 					else
 					{
