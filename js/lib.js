@@ -88,15 +88,48 @@ var Bindr = {
 		}
 
 		return false;
+	},
+
+	/**
+	 * Hooray namespacing...
+	 * @param string... String arguments each with a namespace (similar to YUI namespacing
+	 */
+	namespace : function(/* ... */)
+	{
+		var a=arguments, o=null, i, j, d;
+		for (i=0; i<a.length; i=i+1) {
+			d=a[i].split(".");
+			o=window;
+			for (j=0; j<d.length; j=j+1) {
+				o[d[j]]=o[d[j]] || {};
+				o=o[d[j]];
+			}
+		}
+		return o;
+	},
+
+	/**
+	 * Return an instance of a mapping based on the type
+	 * see the files in js/actions/<type> for definitions
+	 * @param {string} type   Action type
+	 * @param {object} config Config object to pass to the new instance
+	 * @return Bindr.Mapping
+	 */
+	createMapping : function (type, config)
+	{
+		var classname = type.replace(/(^[a-z]|\-[a-z])/g, function(str){return str.toUpperCase().replace('-','_');});
+		return new Bindr.Mapping[classname](config)
 	}
 };
+
+
+Bindr.namespace('Bindr.Mapping');
 
 /**
  * An action mapping for Bindr
  */
-var Bindr_Mapping = function (config) {
+Bindr.Mapping = function (config) {
 	var self = this;
-	self.elcounter = 0;
 
 	/**
 	 * general config
@@ -114,65 +147,7 @@ var Bindr_Mapping = function (config) {
 	 * @param {array} args  Current argument to the command e.g., \20G, the args are [2,0]
 	 * @param {Event} event DOM Event for the keypress
 	 */
-	self.action = function (args, event)
-	{
-		self['exec_' + self.config.type.replace(/-/g, '_')](args);
-	};
-
-	/**
-	 * Scroll type handler
-	 * @param {array} args Command arguments (scroll pixel count)
-	 */
-	self.exec_scroll = function (args)
-	{
-		window.scrollBy(0, self.config.data.count || 20);
-	};
-
-	/**
-	 * 'Custom' type handler
-	 * @param {array} args Command arguments (scroll pixel count)
-	 */
-	self.exec_custom = function (args)
-	{
-		var code = self.config.data;
-		code = code.replace(/%args%/, args.join(''));
-		eval(code);
-	};
-
-	/**
-	 * Scroll by selector type handler
-	 * @param {array} args Command arguments (Nth item)
-	 */
-	self.exec_scroll_el = function (args)
-	{
-		if (args.length) self.elcounter += parseInt(args.join(''), 10);
-		window.scrollTo(0, jQuery(jQuery.trim(self.config.data)).eq(self.elcounter++).prop('offsetTop'));
-	};
-
-
-	/**
-	 * Go to a url, passing the command arg
-	 * @param {array} args Command arguments
-	 */
-	self.exec_visit_url = function (args)
-	{
-		url = self.config.data.replace(/%args%/, args.join(''));
-		window.location.href = url;
-	};
-
-	/**
-	 * Click an element by selector type handler
-	 * @param {array} args Command arguments
-	 */
-	self.exec_click = function (args)
-	{
-		var selector = self.config.data.replace(/%args%/, args.join(''));
-		var evt = document.createEvent('MouseEvents');
-		evt.initEvent('click', true, false);
-		var node = document.querySelector(selector);
-		if (node) node.dispatchEvent(evt);
-		else Bindr.showWarning('No element found for selector "' + selector + '"', 1000);
-	};
+	self.action = function (args, event) { };
 
 	/**
 	 * @return {int} Keycode for this mapping's key

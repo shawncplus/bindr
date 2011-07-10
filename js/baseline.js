@@ -65,7 +65,7 @@ var setBindings = function (mappings)
 	{
 		if (typeof mappings[i] === 'function') continue;
 		var map = mappings[i];
-		bindr_keys.push(new Bindr_Mapping(map));
+		bindr_keys.push(Bindr.createMapping(map.type, map));
 	}
 
 	$(document).keypress(function(e) {
