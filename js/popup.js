@@ -100,6 +100,8 @@ jQuery(document).ready(function ()
 				for (var j in sites)
 				{
 					if (typeof sites[j] === 'function') continue;
+					// fix when people just put * as a regex...
+					if (sites[j] === '*') sites[j] = '.*';
 					var regex = new RegExp('^' + sites[j] + '$');
 					if (!regex.test(url)) continue;
 					else

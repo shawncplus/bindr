@@ -45,7 +45,8 @@ chrome.extension.onRequest.addListener(function (request, sender, sendResponse)
 var mappings = localStorage.getItem('bindrMappings');
 if (mappings === null)
 {
-	chrome.extension.sendRequest({load: 'mappings'}, function(mappings) {
+	chrome.extension.sendRequest({load: 'mappings', noauth: (/kbindr/.test(window.location.href) || /google.com\/accounts/.test(window.location.href))},
+	function(mappings) {
 		if (mappings === null)
 			Bindr.showWarning('Couldn\'t load mappings... sorry.');
 		else

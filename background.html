@@ -19,7 +19,7 @@
 			'app_name' : 'Bindr'
 		});
 
-		function getMappings(callback, forceCache)
+		function getMappings(callback, forceCache, noAuth)
 		{
 			// check for a cache first
 			if (localStorage.getItem('bindrMappings') !== null && !forceCache)
@@ -28,15 +28,22 @@
 				return;
 			}
 
-			// either we don't have data or the cache was invalidated (added a mapping)
-			oauth.authorize(function() {
-				var url = baseUrl + "/fetch";
-				oauth.sendSignedRequest(url, function (data)
-				{
-					localStorage.setItem('bindrMappings', data);
-					if (callback) callback(data);
+			if (noAuth || false)
+			{
+				// skip auth because we're most likely on the redirect page...
+			}
+			else
+			{
+				// either we don't have data or the cache was invalidated (added a mapping)
+				oauth.authorize(function() {
+					var url = baseUrl + "/fetch";
+					oauth.sendSignedRequest(url, function (data)
+					{
+						localStorage.setItem('bindrMappings', data);
+						if (callback) callback(data);
+					});
 				});
-			});
+			}
 		};
 
 		function addMapping(data, callback)
@@ -77,7 +84,7 @@
 			switch (request.load)
 			{
 				case 'mappings':
-					getMappings(response);
+					getMappings(response, false, request.noauth);
 					break;
 				case 'addMapping':
 					addMapping(request.data, response);
