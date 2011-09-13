@@ -80,6 +80,7 @@ var Bindr = {
 			{
 				if (typeof sites[j] === 'function') continue;
 
+				if (sites[j] === '*') sites[j] = '.*';
 				var regex = new RegExp('^' + sites[j] + '$');
 
 				if (regex.test(site) && bindr_key.getKeyCode() === keycode)
