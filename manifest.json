@@ -1,6 +1,6 @@
 {
 	"name": "Bindr",
-		"version": "0.2.2",
+		"version": "0.2.3",
 		"description": "Per-page/site/global keybindings with built-in bindings",
 		"browser_action": {
 			"default_icon":  "icon.png",
